@@ -1,0 +1,19 @@
+# GUI + LSL for Data Collection
+pygame
+pylsl
+
+# EEG Data Processing
+numpy
+pandas
+scipy
+matplotlib
+seaborn
+mne
+
+# Machine Learning & Deep Learning for EEG Classification
+tensorflow
+keras
+torch
+torchvision
+torchaudio
+scikit-learn
