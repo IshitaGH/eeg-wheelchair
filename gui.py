@@ -18,10 +18,10 @@ BLUE = (50, 50, 255)
 MOVEMENT_DIRECTIONS = ["Forward", "Backward", "Left", "Right"]
 
 # Experiment Parameters
-NUM_TRIALS = 50  # Number of trials per direction
-BASELINE_TIME = 2  # Baseline period in seconds
-IMAGINATION_TIME = 6  # Imagination period in seconds
-REST_TIME = 3  # Rest period in seconds
+NUM_TRIALS = 20  # Number of trials per direction
+BASELINE_TIME = 5  # Baseline period in seconds
+IMAGINATION_TIME = 10  # Imagination period in seconds
+REST_TIME = 5  # Rest period in seconds
 DIRECTION_PREP_TIME = 5  # Time before each direction starts
 
 def update_screen_size():
