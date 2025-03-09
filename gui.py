@@ -20,11 +20,11 @@ BLUE = (50, 50, 255)
 MOVEMENT_DIRECTIONS = ["Forward", "Backward", "Left", "Right"]
 
 # Experiment Parameters
-NUM_TRIALS = 2
-BASELINE_TIME = 1
-IMAGINATION_TIME = 1
-REST_TIME = 1
-DIRECTION_PREP_TIME = 1
+NUM_TRIALS = 20
+BASELINE_TIME = 5
+IMAGINATION_TIME = 10
+REST_TIME = 5
+DIRECTION_PREP_TIME = 30
 
 # Variables for stopwatch and timing
 stopwatch_start = None
