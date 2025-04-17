@@ -30,12 +30,18 @@ DIRECTION_PREP_TIME = 5
 
 # Image loading
 IMAGE_PATH = "images"
+ARROW_PATH = "images_arrows"
 direction_images = {}
+arrow_images = {}
 for direction in DIRECTIONS:
-    path = os.path.join(IMAGE_PATH, f"{direction.lower()}.png")
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"Missing image for {direction}: {path}")
-    direction_images[direction] = pygame.image.load(path)
+    house_path = os.path.join(IMAGE_PATH, f"{direction.lower()}.png")
+    arrow_path = os.path.join(ARROW_PATH, f"{direction.lower()}_arrow.png")
+    if not os.path.exists(house_path):
+        raise FileNotFoundError(f"Missing house image for {direction}: {house_path}")
+    if not os.path.exists(arrow_path):
+        raise FileNotFoundError(f"Missing arrow image for {direction}: {arrow_path}")
+    direction_images[direction] = pygame.image.load(house_path)
+    arrow_images[direction] = pygame.image.load(arrow_path)
 
 # Timestamps and logging
 stopwatch_start = None
@@ -53,15 +59,18 @@ def get_elapsed_time():
         return "0.000"
     return f"{(time.time() - stopwatch_start):.3f}"
 
-def save_timestamps():
-    if current_direction is None:
-        return
-    timestamp = datetime.now().strftime("%H-%M-%S")
-    filename = os.path.join(folder_name, f"{date_str}_{current_direction}_{timestamp}.csv")
+def save_timestamps(trial_num):
+    # build a filename like "2025-04-17_trial03.csv"
+    filename = os.path.join(
+        folder_name,
+        f"{date_str}_trial{trial_num:02d}.csv"
+    )
+
     with open(filename, "w", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow(["Timestamp", "Elapsed Time (s)", "Event"])
+        writer.writerow(["Real Time", "Elapsed (s)", "Event"])
         writer.writerows(timestamp_log)
+
 
 def update_screen_size():
     global SCREEN_WIDTH, SCREEN_HEIGHT
@@ -80,9 +89,9 @@ def log_event(event_name):
 
 def wait_for_space(text):
     update_screen_size()
-    screen.fill(WHITE)
+    screen.fill(BLACK)
     font = get_scaled_font(36)
-    text_surface = font.render(text, True, BLACK)
+    text_surface = font.render(text, True, WHITE)
     text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
     screen.blit(text_surface, text_rect)
     pygame.display.flip()
@@ -95,15 +104,16 @@ def wait_for_space(text):
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 waiting = False
 
-def display_countdown(direction):
+
+def display_countdown(direction, duration=DIRECTION_PREP_TIME):
     start_time = time.time()
-    while time.time() - start_time < DIRECTION_PREP_TIME:
+    while time.time() - start_time < duration:
         update_screen_size()
-        screen.fill(WHITE)
+        screen.fill(BLACK)
         font = get_scaled_font(36)
         countdown = DIRECTION_PREP_TIME - int(time.time() - start_time)
-        text_surface = font.render(f"Focus on {direction} image", True, BLACK)
-        countdown_surface = font.render(f"Starting in {countdown} seconds", True, BLACK)
+        text_surface = font.render(f"Focus on {direction} image", True, WHITE)
+        countdown_surface = font.render(f"Starting in {countdown} seconds", True, WHITE)
         text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 30))
         countdown_rect = countdown_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 30))
         screen.blit(text_surface, text_rect)
@@ -114,67 +124,80 @@ def display_countdown(direction):
 def flicker_images(focus_direction, duration):
     start_time = time.time()
     frame_clock = pygame.time.Clock()
-    flicker_phases = {dir: 0 for dir in DIRECTIONS}
 
-    image_size = (150, 150)
-    spacing = SCREEN_WIDTH // 5
-    y_pos = SCREEN_HEIGHT // 2 - image_size[1] // 2
-    img_w, img_h = image_size
+    # Positions for each direction
+    img_w, img_h = 150, 150
     positions = {
-        "Forward":  (SCREEN_WIDTH // 2 - img_w // 2, SCREEN_HEIGHT // 6 - img_h // 2),
-        "Backward": (SCREEN_WIDTH // 2 - img_w // 2, SCREEN_HEIGHT * 5 // 6 - img_h // 2),
-        "Left":     (SCREEN_WIDTH // 6 - img_w // 2, SCREEN_HEIGHT // 2 - img_h // 2),
-        "Right":    (SCREEN_WIDTH * 5 // 6 - img_w // 2, SCREEN_HEIGHT // 2 - img_h // 2),
+        "Forward":  (SCREEN_WIDTH // 2 - img_w // 2, SCREEN_HEIGHT // 6 - img_h // 2),     # Top center
+        "Backward": (SCREEN_WIDTH // 2 - img_w // 2, SCREEN_HEIGHT * 5 // 6 - img_h // 2), # Bottom center
+        "Left":     (SCREEN_WIDTH // 6 - img_w // 2, SCREEN_HEIGHT // 2 - img_h // 2),    # Middle left
+        "Right":    (SCREEN_WIDTH * 5 // 6 - img_w // 2, SCREEN_HEIGHT // 2 - img_h // 2)  # Middle right
     }
-
 
     log_event(f"Flicker Start - {focus_direction}")
 
     while time.time() - start_time < duration:
         update_screen_size()
-        screen.fill(WHITE)
+        screen.fill(BLACK)
         current_ticks = pygame.time.get_ticks()
 
         for direction, freq in DIRECTIONS.items():
-            interval_ms = 1000 / (2 * freq)  # 2x for full cycle (on/off)
-            visible = (current_ticks // interval_ms) % 2 == 0
-            if visible:
-                img = pygame.transform.scale(direction_images[direction], image_size)
-                screen.blit(img, positions[direction])
+            interval_ms = 1000 / (2 * freq)
+            phase = (current_ticks // interval_ms) % 2
+            # phase 0: show house, phase 1: show arrow
+            if phase == 0:
+                img = pygame.transform.scale(direction_images[direction], (img_w, img_h))
+            else:
+                img = pygame.transform.scale(arrow_images[direction], (img_w, img_h))
+            screen.blit(img, positions[direction])
 
         pygame.display.flip()
         frame_clock.tick(60)
 
     log_event(f"Flicker End - {focus_direction}")
 
+
 def instruction_screen():
     wait_for_space("Welcome to SSVEP Training. Press SPACE to begin.")
 
+
 def run_trials():
     global stopwatch_start, current_direction, timestamp_log
+
     directions = list(DIRECTIONS.keys())
 
-    for trial_num in range(NUM_TRIALS):
-        random.shuffle(directions)
-        for direction in directions:
+    for trial_num in range(1, NUM_TRIALS + 1):
+        # 1. reset your stopwatch & logs at the start of each trial
+        stopwatch_start = None
+        timestamp_log   = []
+
+        # 2. pick one random permutation of the 4 directions
+        trial_order = random.sample(directions, len(directions))
+
+        # 3. iterate through that order
+        for idx, direction in enumerate(trial_order, start=1):
             current_direction = direction
-            stopwatch_start = None
-            timestamp_log = []
-            wait_for_space(f"Trial {trial_num + 1}: Press SPACE to prepare.")
+            wait_for_space(
+                f"Trial {trial_num}/{NUM_TRIALS} — Stimulus {idx}/4: Press SPACE"
+            )
             display_countdown(direction)
             flicker_images(direction, FOCUS_TIME)
-            save_timestamps()
+
+        # 4. once you’ve shown all 4, save a single CSV for the trial
+        save_timestamps(trial_num)
 
     display_text("Training Complete! Thank you!", 5)
     pygame.quit()
+
+
 
 def display_text(text, duration):
     start_time = time.time()
     while time.time() - start_time < duration:
         update_screen_size()
-        screen.fill(WHITE)
+        screen.fill(BLACK)
         font = get_scaled_font(36)
-        text_surface = font.render(text, True, BLACK)
+        text_surface = font.render(text, True, WHITE)
         text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
         screen.blit(text_surface, text_rect)
         pygame.display.flip()
