@@ -24,6 +24,8 @@ TRIAL_DURATION = 10
 BASELINE_DURATION = 10
 PHASE_ONE_TRIALS_PER_DIRECTION = 5
 PHASE_TWO_TOTAL_TRIALS = 20
+FLASH_DURATION = 0.1  # Short flash duration
+INTER_FLASH_DELAY = 0.1  # Delay between flashes
 
 # Image loading
 IMAGE_PATH = "images"
@@ -85,6 +87,28 @@ def countdown():
         pygame.display.flip()
         time.sleep(1)
 
+def show_direction_prompt(direction):
+    screen.fill(BLACK)
+    font = pygame.font.Font(None, 36)
+    text = font.render(direction, True, RED)
+    screen.blit(text, (SCREEN_WIDTH - 200, 20))
+
+    img_w, img_h = 150, 150
+    positions = {
+        "Forward":  (SCREEN_WIDTH // 2 - img_w // 2, SCREEN_HEIGHT // 6 - img_h // 2),
+        "Backward": (SCREEN_WIDTH // 2 - img_w // 2, SCREEN_HEIGHT * 5 // 6 - img_h // 2),
+        "Left":     (SCREEN_WIDTH // 6 - img_w // 2, SCREEN_HEIGHT // 2 - img_h // 2),
+        "Right":    (SCREEN_WIDTH * 5 // 6 - img_w // 2, SCREEN_HEIGHT // 2 - img_h // 2)
+    }
+
+    # Display static arrows only
+    for dir in DIRECTIONS:
+        arrow = arrow_images[dir]
+        screen.blit(pygame.transform.scale(arrow, (img_w, img_h)), positions[dir])
+
+    pygame.display.flip()
+    time.sleep(2)  # Show direction text for 2 seconds
+
 def flash_sequence(direction):
     img_w, img_h = 150, 150
     positions = {
@@ -94,30 +118,42 @@ def flash_sequence(direction):
         "Right":    (SCREEN_WIDTH * 5 // 6 - img_w // 2, SCREEN_HEIGHT // 2 - img_h // 2)
     }
 
-    flash_order = [("Forward", "Left"), ("Top", "Right"), ("Left", "Right"), ("Forward", "Backward")]
-    flash_order = [random.sample(DIRECTIONS, 2) for _ in range(10)]
-
+    start_time = time.time()
     log_event(f"Start Flashing - {direction}")
-    for combo in flash_order:
+
+    while time.time() - start_time < TRIAL_DURATION:
+        combo = random.sample(DIRECTIONS, 2)
         screen.fill(BLACK)
+
+        # Draw base arrows
         for dir in DIRECTIONS:
-            img = direction_images[dir]
-            if dir in combo:
-                img = arrow_images[dir]  # flash arrow
-            screen.blit(pygame.transform.scale(img, (img_w, img_h)), positions[dir])
-        font = pygame.font.Font(None, 36)
-        text = font.render(direction, True, RED)
-        screen.blit(text, (SCREEN_WIDTH - 200, 20))
+            arrow = arrow_images[dir]
+            screen.blit(pygame.transform.scale(arrow, (img_w, img_h)), positions[dir])
+
+        # Overlay flashed images
+        for dir in combo:
+            overlay = direction_images[dir]
+            screen.blit(pygame.transform.scale(overlay, (img_w, img_h)), positions[dir])
+
         pygame.display.flip()
         log_event(f"Flash {combo}")
-        time.sleep(0.3)  # flash duration
+        time.sleep(FLASH_DURATION)
+
+        # Redraw base arrows without images
+        screen.fill(BLACK)
+        for dir in DIRECTIONS:
+            arrow = arrow_images[dir]
+            screen.blit(pygame.transform.scale(arrow, (img_w, img_h)), positions[dir])
+        pygame.display.flip()
+        time.sleep(INTER_FLASH_DELAY)
 
     log_event(f"End Flashing - {direction}")
-    time.sleep(BASELINE_DURATION)  # baseline black screen
-    log_event(f"Baseline - {direction}")
 
+    # Baseline
     screen.fill(BLACK)
     pygame.display.flip()
+    time.sleep(BASELINE_DURATION)
+    log_event(f"Baseline - {direction}")
 
 def phase(direction_order, phase_num):
     for i, direction in enumerate(direction_order):
@@ -125,6 +161,7 @@ def phase(direction_order, phase_num):
         stopwatch_start = None
         timestamp_log = []
         log_event(f"Start Trial {i+1} - {direction}")
+        show_direction_prompt(direction)
         flash_sequence(direction)
         log_event(f"End Trial {i+1} - {direction}")
         save_log(f"phase{phase_num}_trial{i+1}_{direction}.csv")
