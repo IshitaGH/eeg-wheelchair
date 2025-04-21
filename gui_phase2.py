@@ -33,7 +33,7 @@ timestamp_log = []
 stopwatch_start = None
 
 date_str = datetime.now().strftime("%Y-%m-%d")
-folder_name = f"Data Collection - P300 {date_str} S1 P2"
+folder_name = f"Data Collection - P300 {date_str} S2 P2"
 os.makedirs(folder_name, exist_ok=True)
 
 def log_event(event):
