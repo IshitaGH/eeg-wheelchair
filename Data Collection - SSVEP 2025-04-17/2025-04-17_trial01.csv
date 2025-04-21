@@ -1,9 +1,0 @@
-Real Time,Elapsed (s),Event
-1744886856.424159,0.000,Flicker Start - Left
-1744886861.425466,5.001,Flicker End - Left
-1744886870.0414321,13.617,Flicker Start - Forward
-1744886875.052586,18.628,Flicker End - Forward
-1744886881.539093,25.115,Flicker Start - Backward
-1744886886.55486,30.131,Flicker End - Backward
-1744886892.393143,35.969,Flicker Start - Right
-1744886897.4045818,40.980,Flicker End - Right
