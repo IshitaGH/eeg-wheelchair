@@ -18,8 +18,8 @@ DIRECTIONS = ["Forward", "Backward", "Left", "Right"]
 TRIAL_DURATION = 10
 BASELINE_DURATION = 10
 PHASE_TWO_TOTAL_TRIALS = 20
-FLASH_DURATION = 0.1  # balanced for visibility and P300 spacing
-INTER_FLASH_DELAY = 0.1  # allow reset before next flash
+FLASH_DURATION = 0.2  # balanced for visibility and P300 spacing
+INTER_FLASH_DELAY = 0.2  # allow reset before next flash
 
 IMAGE_PATH = "images"
 ARROW_PATH = "images_arrows"
