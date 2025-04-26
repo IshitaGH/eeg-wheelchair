@@ -116,7 +116,7 @@ def preprocess_all(raw_folder, fs=250, epoch_ms=300):
     return X, y, all_epochs, all_labels
 
 if __name__ == "__main__":
-    raw_folder = "/Users/adhityaram/Projects/eeg-wheelchair/Color Recognition /color_recog"
+    raw_folder = "/Users/adhityaram/Projects/eeg-wheelchair/Color_Recognition/color_recog"
     X, y, raw_epochs, raw_labels = preprocess_all(raw_folder, epoch_ms=300)  # 300ms epoch size
     print("X shape:", X.shape)
     print("y shape:", y.shape)
