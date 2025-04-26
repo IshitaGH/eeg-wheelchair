@@ -7,7 +7,7 @@ from sklearn.decomposition import PCA
 from sklearn.pipeline import Pipeline
 
 # 1. Load your processed data
-pickle_path = "/Users/adhityaram/Projects/eeg-wheelchair/Color Recognition /color_recog/processed_data.pkl"
+pickle_path = "/Users/adhityaram/Projects/eeg-wheelchair/Color_Recognition/color_recog/processed_data.pkl"
 with open(pickle_path, "rb") as f:
     data = pickle.load(f)
 X, y = data['X'], data['y']

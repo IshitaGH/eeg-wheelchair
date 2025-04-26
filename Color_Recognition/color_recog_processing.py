@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
+import scipy.signal as signal
 from scipy.signal import iirnotch, butter, filtfilt
 
 def load_and_crop(csv_file, fs=250, calibration_sec=35):
@@ -53,7 +54,7 @@ def extract_epochs(data, fs=250, trials=3, flash_dur=3, inter_flash=3, baseline_
 
     return epochs, labels
 
-def reject_artifacts(epochs, labels, threshold=100.0):
+def reject_artifacts(epochs, labels, threshold=75.0):
     clean_e, clean_l = [], []
     for ep, lbl in zip(epochs, labels):
         if np.any(np.abs(ep) > threshold):
@@ -62,7 +63,7 @@ def reject_artifacts(epochs, labels, threshold=100.0):
         clean_l.append(lbl)
     return clean_e, clean_l
 
-def baseline_correct(epochs, fs=250, baseline_ms=100):
+def baseline_correct(epochs, fs=250, baseline_ms=100.0):
     base_samps = int((baseline_ms / 1000) * fs)
     return [ep - ep[:, :base_samps].mean(axis=1, keepdims=True) for ep in epochs]
 
@@ -73,6 +74,18 @@ def average_channels(epochs):
     Output: list of (1, n_samples)
     """
     return [ep.mean(axis=0, keepdims=True) for ep in epochs]
+
+def wavelet_transform(epochs, fs=250, widths=np.arange(1, 31), w=7):
+    transformed_epochs = []
+    for epoch in epochs:
+        ch_trans = []
+        for channel in epoch:
+
+            # morlet2 takes arguments (length, w), so we wrap via signal.morlet2
+            coeffs = signal.cwt(channel, signal.morlet2, widths, w=w)
+            ch_trans.append(coeffs)
+        transformed_epochs.append(np.array(ch_trans))
+    return transformed_epochs
 
 def plot_erp(epochs, labels, fs=250):
     epochs = np.stack(epochs)  # (n_epochs, 1, n_samp)
@@ -106,26 +119,27 @@ def preprocess_all(raw_folder, fs=250, epoch_ms=300):
         epochs, labels = reject_artifacts(epochs, labels)
         epochs         = baseline_correct(epochs, fs=fs)
         epochs         = average_channels(epochs)  # <<<<<< Averaging here
-        all_epochs.extend(epochs)
+        transformed_epochs = wavelet_transform(epochs, fs=fs)  # Apply wavelet transform
+        all_epochs.extend(transformed_epochs)
         all_labels.extend(labels)
 
-    all_epochs = np.stack(all_epochs, axis=0)  # (n_epochs, 1, 250)
-    n_epochs, n_chan, n_samp = all_epochs.shape
-    X = all_epochs.reshape(n_epochs, n_chan * n_samp)
+    all_epochs = np.stack(all_epochs, axis=0)  # (n_epochs, n_channels, n_samp, n_wavelet_widths)
+    n_epochs, n_chan, n_samp, n_widths = all_epochs.shape
+    X = all_epochs.reshape(n_epochs, n_chan * n_samp * n_widths)
     y = np.array(all_labels)
     return X, y, all_epochs, all_labels
 
 if __name__ == "__main__":
-    raw_folder = "/Users/adhityaram/Projects/eeg-wheelchair/Color_Recognition/color_recog"
+    raw_folder = "/Users/adhityaram/Projects/eeg-wheelchair/Color Recognition /color_recog"
     X, y, raw_epochs, raw_labels = preprocess_all(raw_folder, epoch_ms=300)  # 300ms epoch size
     print("X shape:", X.shape)
     print("y shape:", y.shape)
 
     # Save to pickle
-    output_path = os.path.join(raw_folder, "processed_data.pkl")
+    output_path = os.path.join(raw_folder, "processed_data_with_wavelet.pkl")
     with open(output_path, "wb") as pf:
         pickle.dump({'X': X, 'y': y}, pf)
-    print(f"Saved processed data to {output_path}")
+    print(f"Saved processed data with wavelet transform to {output_path}")
 
     # Plot ERP waveforms
     plot_erp(raw_epochs, raw_labels)
