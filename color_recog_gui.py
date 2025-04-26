@@ -10,7 +10,7 @@ from datetime import datetime
 pygame.init()
 # start windowed at 800×600, but we’ll query the real size each frame
 screen = pygame.display.set_mode((800, 600), pygame.RESIZABLE)
-pygame.display.set_caption("EEG Data Collection - P300 - Phase 1")
+pygame.display.set_caption("EEG Data Collection - Color Recognition")
 
 # Colors
 WHITE = (255, 255, 255)
@@ -30,7 +30,7 @@ house_image = pygame.image.load(os.path.join(IMAGE_PATH, HOUSE_IMAGE))
 timestamp_log    = []
 stopwatch_start  = None
 date_str         = datetime.now().strftime("%Y-%m-%d")
-folder_name      = f"Data Collection - P300 {date_str} S1 P1"
+folder_name      = f"Data Collection - P300 {date_str} Session 1"
 os.makedirs(folder_name, exist_ok=True)
 
 
@@ -94,7 +94,7 @@ def show_image():
     screen.fill(BLACK)
 
     # define image size (you can also scale with w/h if you like)
-    img_w, img_h = 200, 200
+    img_w, img_h = 150, 150
     # center in left half
     x = w//10 - img_w//2
     y = h//2 - img_h//2
