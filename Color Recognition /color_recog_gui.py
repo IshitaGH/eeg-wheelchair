@@ -30,7 +30,7 @@ house_image = pygame.image.load(os.path.join(IMAGE_PATH, HOUSE_IMAGE))
 timestamp_log    = []
 stopwatch_start  = None
 date_str         = datetime.now().strftime("%Y-%m-%d")
-folder_name      = f"Data Collection - P300 {date_str} Session 1"
+folder_name      = f"Data Collection - P300 {date_str} Session 6"
 os.makedirs(folder_name, exist_ok=True)
 
 

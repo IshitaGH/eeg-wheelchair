@@ -1,0 +1,10 @@
+Real Time,Elapsed Time,Event
+1745659119.811381,0.000,Start Trial 1 - Forward
+1745659119.811417,0.000,Start Flashing - Forward
+1745659119.819647,0.008,Flash [Forward] #1
+1745659122.827158,3.016,Blank Screen - 0.5s delay
+1745659125.833808,6.022,Flash [Forward] #2
+1745659128.841334,9.030,Blank Screen - 0.5s delay
+1745659131.849611,12.038,Flash [Forward] #3
+1745659134.854941,15.044,End Flashing - Forward
+1745659144.858761,25.047,End Trial 1 - Forward
