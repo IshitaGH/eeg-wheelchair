@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 
 # Path to your processed pickle file
-data_path = os.path.join('preprocessed', 'processed_data.pkl')
+data_path = os.path.join('preprocessed', 'processed_data_v4.pkl')
 
 # Load the pickle
 with open(data_path, 'rb') as f:

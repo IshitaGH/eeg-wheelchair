@@ -7,7 +7,7 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
 # Configuration
-DATA_PKL = 'preprocessed/processed_data_v3.pkl'
+DATA_PKL = 'preprocessed/processed_data_v4.pkl'
 TEST_SIZE = 0.2
 RANDOM_STATE = 42
 
